@@ -1,4 +1,6 @@
 import React from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const Column: React.FC<{ column: columns; onDelete: (id: id) => void }> = (
   props
@@ -7,12 +9,35 @@ const Column: React.FC<{ column: columns; onDelete: (id: id) => void }> = (
     props.onDelete(id);
   };
 
+  // pick the dragable item and use useSortable hook and import styles and the properties
+  const { setNodeRef, attributes, listeners, transform, transition } =
+    useSortable({
+      id: props.column.id,
+      data: {
+        type: "column",
+        column: props.column,
+      },
+    });
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
   return (
+    // setting the ref to the node and the style for the dragable item
     <div
+      ref={setNodeRef}
+      style={style}
       key={props.column.id}
       className="bg-col-bg w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col gap-2 text-white p-2"
     >
-      <div className="flex rounded-lg bg-second-color px-4 py-2 justify-between">
+      {/* adiing the attributes and the listerners */}
+      <div
+        className="flex rounded-lg bg-second-color px-4 py-2 justify-between"
+        {...attributes}
+        {...listeners}
+      >
         <div className="flex gap-3 font-bold">
           <div>0</div>
           <div>{props.column.title}</div>
