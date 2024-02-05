@@ -10,7 +10,6 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
     props.onDelete(id);
   };
 
-  const [column, setColumn] = useState<columns>(props.element);
   const [edit, setEdit] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   // pick the dragable item and use useSortable hook and import styles and the properties
@@ -22,10 +21,10 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
     transition,
     isDragging,
   } = useSortable({
-    id: column.id,
+    id: props.element.id,
     data: {
       type: "column",
-      column: column,
+      column: props.element,
     },
   });
 
@@ -44,9 +43,7 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
   };
 
   const submitHandler = () => {
-    setColumn((previousState) => {
-      return { ...previousState, title: input };
-    });
+  
   };
 
   if (isDragging) {
@@ -54,7 +51,7 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
       <div
         ref={setNodeRef}
         style={style}
-        key={column.id}
+        key={props.element.id}
         className="bg-col-bg w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col gap-2 text-white p-2 opacity-45 border-second-color border-2"
       ></div>
     );
@@ -65,8 +62,8 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
     <div
       ref={setNodeRef}
       style={style}
-      key={column.id}
-      className="bg-col-bg w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col gap-2 text-white p-2"
+      key={props.element.id}
+      className="bg-col-bg w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col gap-2 text-white p-2 shadow-[0_3px_10px_rgb(0,0,0,0.2)] shadow-col-bg"
     >
       {/* adiing the attributes and the listerners from the hook*/}
       <div
@@ -77,12 +74,12 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
       >
         <div className="flex gap-3 font-bold">
           <div>0</div>
-          {!edit && <div>{column.title}</div>}
+          {!edit && <div>{props.element.title}</div>}
           {edit && (
             <div className="flex mr-2">
               <input
                 value={input}
-                placeholder={column.title}
+                placeholder={props.element.title}
                 onBlur={() => {
                   submitHandler;
                   setEdit(false);
@@ -112,7 +109,7 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
           )}
         </div>
         <button
-          onClick={(event: React.MouseEvent) => deleteHandler(column.id, event)}
+          onClick={(event: React.MouseEvent) => deleteHandler(props.element.id, event)}
           className="opacity-80 hover:opacity-100"
         >
           <svg

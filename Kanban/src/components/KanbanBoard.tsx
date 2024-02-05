@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { SortableContext } from "@dnd-kit/sortable";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 
 const KanbanBoard = () => {
@@ -27,6 +27,8 @@ const KanbanBoard = () => {
   };
 
   const deleteHandler = (id: id) => {
+    console.log(col);
+
     console.log(id);
 
     const newCol = col.filter((element) => element.id !== id);
@@ -48,15 +50,22 @@ const KanbanBoard = () => {
   //   setting the logique for the dragabale when its end to switch the places between columns
   const dragEndHandler = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (active.id !== over?.id) {
-      const activeIndex = col.findIndex((element) => element.id === active.id);
-      const overIndex = col.findIndex((element) => element.id === over?.id);
-      const newCol = [...col];
-      newCol.splice(activeIndex, 1);
-      newCol.splice(overIndex, 0, activeCol as columns);
-      setCol(newCol);
+    if (!over) {
+      return;
     }
+    const activeColumn = active.id;
+    const overColumn = over.id;
+    if (activeColumn === overColumn) {
+      return;
+    }
+  
+    setCol((col) => {
+      const activeIndex = col.findIndex((c) => c.id === activeColumn);
+      const overIndex = col.findIndex((c) => c.id === overColumn);
+      return arrayMove(col, activeIndex, overIndex);
+    });
   };
+  
 
   // solving the problem of the delete button (conflict with the drag action and the button action)
   // adding some kind of delay for the drag to avoid the conflict
@@ -71,13 +80,13 @@ const KanbanBoard = () => {
   return (
     // setting the context provider for the dnd
 
-    <div className="m-auto overflow-x-auto overflow-y-auto sm:overflow-hidden min-h-screen max-h-screen w-full items-center flex px-7 ">
+    <div className="m-auto overflow-x-auto overflow-y-auto sm:overflow-y-hidden min-h-screen max-h-screen w-full items-center flex px-7 ">
       <DndContext
         onDragStart={dragStartHandler}
         onDragEnd={dragEndHandler}
         sensors={sensors}
       >
-        <div className="m-auto flex sm:flex-row flex-col gap-5 items-end">
+        <div className="m-auto flex sm:flex-row flex-col gap-5 items-start">
           {/* setting the sortable context */}
           <SortableContext items={columnsId}>
             <div className="flex gap-2 text-col-bg sm:flex-row flex-col">
@@ -88,7 +97,7 @@ const KanbanBoard = () => {
           </SortableContext>
 
           <button
-            className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-col-bg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none flex items-center gap-3 "
+            className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-col-bg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none flex items-center gap-3 "
             type="button"
             onClick={addHandlder}
           >
