@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        "main-bg": "#FDF5DF",
-        "col-bg": "#5EBEC4",
-        "second-color": "#F92C85",
+        "main-bg": "#3C0753",
+        "col-bg": "#030637",
+        "second-color": "#720455",
       },
     },
   },

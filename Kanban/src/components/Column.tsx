@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import PlusIcon from "../icons/plusIcon";
 
-const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
-  props
-) => {
+const Column: React.FC<{
+  element: columns;
+  onDelete: (id: id) => void;
+  updateColumn: (id: id, title: string) => void;
+}> = (props) => {
   const deleteHandler = (id: id, event: React.MouseEvent) => {
     event.stopPropagation();
     props.onDelete(id);
@@ -37,13 +40,11 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
   // if the item is dragging return a clone of the dragable item to simulate the drag
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target.value;
-    console.log(input);
-
     setInput(input);
   };
 
   const submitHandler = () => {
-  
+    props.updateColumn(props.element.id, input);
   };
 
   if (isDragging) {
@@ -63,7 +64,7 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
       ref={setNodeRef}
       style={style}
       key={props.element.id}
-      className="bg-col-bg w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col gap-2 text-white p-2 shadow-[0_3px_10px_rgb(0,0,0,0.2)] shadow-col-bg"
+      className="bg-col-bg w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col justify-between gap-2 text-white p-2 shadow-[0_3px_10px_rgb(0,0,0,0.2)] shadow-col-bg"
     >
       {/* adiing the attributes and the listerners from the hook*/}
       <div
@@ -96,12 +97,11 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
                 onChange={(e) => {
                   changeHandler(e);
                 }}
-                onSubmit={submitHandler}
                 className="bg-transparent border-none text-white font-bold w-full outline-none"
               />
               <button
                 className="opacity-75 hover:opacity-100 rounded-full px-2"
-                onClick={submitHandler}
+                onClick={() => submitHandler()}
               >
                 submit
               </button>
@@ -109,7 +109,9 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
           )}
         </div>
         <button
-          onClick={(event: React.MouseEvent) => deleteHandler(props.element.id, event)}
+          onClick={(event: React.MouseEvent) =>
+            deleteHandler(props.element.id, event)
+          }
           className="opacity-80 hover:opacity-100"
         >
           <svg
@@ -129,7 +131,12 @@ const Column: React.FC<{ element: columns; onDelete: (id: id) => void }> = (
         </button>
       </div>
       <div className="flex rounded-lg px-4 py-2 justify-between">content</div>
-      <div className="flex rounded-lg px-4 py-2 justify-between">footer</div>
+      <div className="flex rounded-lg px-3 py-2 gap-2">
+        <button className="rounded-full hover:bg-second-color flex gap-2 px-2 py-1 transition-all duration-300 ease-in-out">
+          <PlusIcon />
+          Add Task
+        </button>
+      </div>
     </div>
   );
 };

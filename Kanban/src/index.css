@@ -7,3 +7,15 @@ body,
 root {
   @apply bg-main-bg text-white box-border;
 }
+
+::-webkit-scrollbar{
+  width: 5px;
+}
+
+::-webkit-scrollbar:horizontal{
+  height: 10px;
+}  
+
+::-webkit-scrollbar-thumb{
+  @apply bg-second-color rounded-full
+}

@@ -13,7 +13,20 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 
 const KanbanBoard = () => {
-  const [col, setCol] = useState<columns[]>([]);
+  const [col, setCol] = useState<columns[]>([
+    {
+      id: "1",
+      title: "ToDo",
+    },
+    {
+      id: "2",
+      title: "Completed",
+    },
+    {
+      id: "3",
+      title: "In Progress",
+    },
+  ]);
   const [activeCol, setActiveCol] = useState<columns | null>(null);
 
   const addHandlder = () => {
@@ -27,10 +40,6 @@ const KanbanBoard = () => {
   };
 
   const deleteHandler = (id: id) => {
-    console.log(col);
-
-    console.log(id);
-
     const newCol = col.filter((element) => element.id !== id);
     setCol(newCol);
   };
@@ -58,14 +67,13 @@ const KanbanBoard = () => {
     if (activeColumn === overColumn) {
       return;
     }
-  
+
     setCol((col) => {
       const activeIndex = col.findIndex((c) => c.id === activeColumn);
       const overIndex = col.findIndex((c) => c.id === overColumn);
       return arrayMove(col, activeIndex, overIndex);
     });
   };
-  
 
   // solving the problem of the delete button (conflict with the drag action and the button action)
   // adding some kind of delay for the drag to avoid the conflict
@@ -76,6 +84,12 @@ const KanbanBoard = () => {
       },
     })
   );
+
+  const updateColumn = (id: id, title: string) => {
+    setCol((cols) =>
+      cols.map((item) => (item.id === id ? { ...item, title } : item))
+    );
+  };
 
   return (
     // setting the context provider for the dnd
@@ -91,7 +105,13 @@ const KanbanBoard = () => {
           <SortableContext items={columnsId}>
             <div className="flex gap-2 text-col-bg sm:flex-row flex-col">
               {col.map((element) => {
-                return <Column element={element} onDelete={deleteHandler} />;
+                return (
+                  <Column
+                    element={element}
+                    onDelete={deleteHandler}
+                    updateColumn={updateColumn}
+                  />
+                );
               })}
             </div>
           </SortableContext>
@@ -120,7 +140,11 @@ const KanbanBoard = () => {
           {createPortal(
             <DragOverlay>
               {activeCol && (
-                <Column element={activeCol} onDelete={deleteHandler} />
+                <Column
+                  element={activeCol}
+                  onDelete={deleteHandler}
+                  updateColumn={updateColumn}
+                />
               )}
             </DragOverlay>,
             document.body
