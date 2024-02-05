@@ -16,7 +16,7 @@ const KanbanBoard = () => {
   const [col, setCol] = useState<columns[]>([
     {
       id: "1",
-      title: "ToDo",
+      title: "To-Do",
     },
     {
       id: "2",
@@ -28,6 +28,7 @@ const KanbanBoard = () => {
     },
   ]);
   const [activeCol, setActiveCol] = useState<columns | null>(null);
+  const [tasks, setTasks] = useState<task[]>([]);
 
   const addHandlder = () => {
     setCol([
@@ -91,6 +92,19 @@ const KanbanBoard = () => {
     );
   };
 
+  const createTask = (id: id) => {
+    const newTask: task = {
+      colId: id,
+      taskId: Math.random().toString(),
+      title: `Task ${tasks.length}`,
+      descreption: "new task",
+    };
+
+    const updatedTasks = tasks.concat([newTask]);
+
+    setTasks(updatedTasks);
+  };
+
   return (
     // setting the context provider for the dnd
 
@@ -110,6 +124,8 @@ const KanbanBoard = () => {
                     element={element}
                     onDelete={deleteHandler}
                     updateColumn={updateColumn}
+                    createTask={createTask}
+                    tasks={tasks}
                   />
                 );
               })}
@@ -144,6 +160,8 @@ const KanbanBoard = () => {
                   element={activeCol}
                   onDelete={deleteHandler}
                   updateColumn={updateColumn}
+                  createTask={createTask}
+                  tasks={tasks}
                 />
               )}
             </DragOverlay>,
