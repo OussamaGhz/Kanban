@@ -104,6 +104,11 @@ const KanbanBoard = () => {
     setTasks(updatedTasks);
   };
 
+  const deleteTaskHandler = (id: id) => {
+    const updatedTasks = tasks.filter(task => task.taskId !== id);
+    setTasks(updatedTasks);
+  };
+
   return (
     // setting the context provider for the dnd
 
@@ -125,6 +130,7 @@ const KanbanBoard = () => {
                     updateColumn={updateColumn}
                     createTask={createTask}
                     tasks={tasks}
+                    onDeleteTask={deleteTaskHandler}
                   />
                 );
               })}
@@ -161,6 +167,7 @@ const KanbanBoard = () => {
                   updateColumn={updateColumn}
                   createTask={createTask}
                   tasks={tasks}
+                  onDeleteTask={deleteTaskHandler}
                 />
               )}
             </DragOverlay>,

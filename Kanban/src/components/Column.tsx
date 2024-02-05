@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import PlusIcon from "../icons/plusIcon";
@@ -11,6 +11,7 @@ const Column: React.FC<{
   updateColumn: (id: id, title: string) => void;
   createTask: (id: id) => void;
   tasks: task[];
+  onDeleteTask: (id: id) => void;
 }> = (props) => {
   const deleteHandler = (id: id, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -19,7 +20,14 @@ const Column: React.FC<{
 
   const [edit, setEdit] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
+  const [tasks, setTasks] = useState<task[]>([]);
 
+  useEffect(() => {
+    const updatedTasks = props.tasks.filter(
+      (task) => task.colId === props.element.id
+    );
+    setTasks(updatedTasks);
+  }, [props.tasks]);
   const {
     setNodeRef,
     attributes,
@@ -53,10 +61,9 @@ const Column: React.FC<{
     props.createTask(id);
   };
 
-  const filteredTasks = useMemo(() => {
-    return props.tasks.filter((task) => task.colId === props.element.id);
-  }, [props.tasks, props.element.id]);
-
+  const taskDeleteHadnler = (id: id) => {
+    props.onDeleteTask(id);
+  };
   if (isDragging) {
     return (
       <div
@@ -67,7 +74,7 @@ const Column: React.FC<{
       ></div>
     );
   }
-  
+
   return (
     <div
       ref={setNodeRef}
@@ -83,7 +90,7 @@ const Column: React.FC<{
           onClick={() => setEdit(true)}
         >
           <div className="flex gap-3 font-bold">
-            <div>0</div>
+            <div>{props.element.id}</div>
             {!edit && <div>{props.element.title}</div>}
             {edit && (
               <div className="flex mr-2">
@@ -124,9 +131,9 @@ const Column: React.FC<{
             <DeleteIcon />
           </button>
         </div>
-        <div className="flex rounded-lg py-2 flex-col flex-grow gap-4 overflow-y-auto max-h-[300px]">
-          {filteredTasks.map((task) => (
-            <Task task={task} />
+        <div className="flex rounded-lg py-2 flex-col flex-grow gap-4 overflow-y-auto max-h-[280px]">
+          {tasks.map((task) => (
+            <Task task={task} onDelete={taskDeleteHadnler} />
           ))}
         </div>
       </div>
