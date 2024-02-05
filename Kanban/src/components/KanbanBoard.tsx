@@ -100,12 +100,11 @@ const KanbanBoard = () => {
     };
 
     const updatedTasks = tasks.concat([newTask]);
-
     setTasks(updatedTasks);
   };
 
   const deleteTaskHandler = (id: id) => {
-    const updatedTasks = tasks.filter(task => task.taskId !== id);
+    const updatedTasks = tasks.filter((task) => task.taskId !== id);
     setTasks(updatedTasks);
   };
 
@@ -129,7 +128,7 @@ const KanbanBoard = () => {
                     onDelete={deleteHandler}
                     updateColumn={updateColumn}
                     createTask={createTask}
-                    tasks={tasks}
+                    tasks={tasks.filter((task) => task.colId === element.id)}
                     onDeleteTask={deleteTaskHandler}
                   />
                 );

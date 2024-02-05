@@ -17,17 +17,15 @@ const Column: React.FC<{
     event.stopPropagation();
     props.onDelete(id);
   };
-
+  
   const [edit, setEdit] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   const [tasks, setTasks] = useState<task[]>([]);
 
-  useEffect(() => {
-    const updatedTasks = props.tasks.filter(
-      (task) => task.colId === props.element.id
-    );
-    setTasks(updatedTasks);
+  useEffect(() => {    
+    setTasks(props.tasks);    
   }, [props.tasks]);
+
   const {
     setNodeRef,
     attributes,
@@ -90,7 +88,6 @@ const Column: React.FC<{
           onClick={() => setEdit(true)}
         >
           <div className="flex gap-3 font-bold">
-            <div>{props.element.id}</div>
             {!edit && <div>{props.element.title}</div>}
             {edit && (
               <div className="flex mr-2">
