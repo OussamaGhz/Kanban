@@ -20,11 +20,11 @@ const KanbanBoard = () => {
     },
     {
       id: "2",
-      title: "Completed",
+      title: "In Progress",
     },
     {
       id: "3",
-      title: "In Progress",
+      title: "Completed",
     },
   ]);
   const [activeCol, setActiveCol] = useState<columns | null>(null);
@@ -34,7 +34,7 @@ const KanbanBoard = () => {
     setCol([
       ...col,
       {
-        id: Math.random().toString(36).substr(2, 9),
+        id: col.length + 1,
         title: `Column  ${col.length + 1}`,
       },
     ]);
@@ -97,7 +97,6 @@ const KanbanBoard = () => {
       colId: id,
       taskId: Math.random().toString(),
       title: `Task ${tasks.length}`,
-      descreption: "new task",
     };
 
     const updatedTasks = tasks.concat([newTask]);
