@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import Column from "./Column";
-import { DndContext, DragOverlay, DragStartEvent } from "@dnd-kit/core";
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 
@@ -36,16 +44,45 @@ const KanbanBoard = () => {
       setActiveCol(event.active.data.current.column);
     }
   };
+
+  //   setting the logique for the dragabale when its end to switch the places between columns
+  const dragEndHandler = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const activeIndex = col.findIndex((element) => element.id === active.id);
+      const overIndex = col.findIndex((element) => element.id === over?.id);
+      const newCol = [...col];
+      newCol.splice(activeIndex, 1);
+      newCol.splice(overIndex, 0, activeCol as columns);
+      setCol(newCol);
+    }
+  };
+
+  // solving the problem of the delete button (conflict with the drag action and the button action)
+  // adding some kind of delay for the drag to avoid the conflict
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    })
+  );
+
   return (
     // setting the context provider for the dnd
-    <DndContext onDragStart={dragStartHandler}>
-      <div className="m-auto overflow-x-auto overflow-y-hidden min-h-screen max-h-screen w-full items-center flex px-7 ">
-        <div className="m-auto flex gap-5 items-end">
+
+    <div className="m-auto overflow-x-auto overflow-y-auto sm:overflow-hidden min-h-screen max-h-screen w-full items-center flex px-7 ">
+      <DndContext
+        onDragStart={dragStartHandler}
+        onDragEnd={dragEndHandler}
+        sensors={sensors}
+      >
+        <div className="m-auto flex sm:flex-row flex-col gap-5 items-end">
           {/* setting the sortable context */}
           <SortableContext items={columnsId}>
-            <div className="flex gap-2 text-col-bg">
+            <div className="flex gap-2 text-col-bg sm:flex-row flex-col">
               {col.map((element) => {
-                return <Column column={element} onDelete={deleteHandler} />;
+                return <Column element={element} onDelete={deleteHandler} />;
               })}
             </div>
           </SortableContext>
@@ -74,14 +111,14 @@ const KanbanBoard = () => {
           {createPortal(
             <DragOverlay>
               {activeCol && (
-                <Column column={activeCol} onDelete={deleteHandler} />
+                <Column element={activeCol} onDelete={deleteHandler} />
               )}
             </DragOverlay>,
             document.body
           )}
         </div>
-      </div>
-    </DndContext>
+      </DndContext>
+    </div>
   );
 };
 
