@@ -4,9 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        "main-bg": "#3C0753",
+        "main-bg": "#000000",
         "col-bg": "#030637",
         "second-color": "#720455",
+        "tasks-bg": "#3C0753",
       },
     },
   },

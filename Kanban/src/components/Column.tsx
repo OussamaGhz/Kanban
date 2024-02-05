@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import PlusIcon from "../icons/plusIcon";
+import PlusIcon from "../icons/PlusIcon";
 import Task from "./Task";
 import DeleteIcon from "../icons/DeleteIcon";
 
@@ -12,18 +12,19 @@ const Column: React.FC<{
   createTask: (id: id) => void;
   tasks: task[];
   onDeleteTask: (id: id) => void;
+  onUpdateTask: (id: id, newTitle: string) => void;
 }> = (props) => {
   const deleteHandler = (id: id, event: React.MouseEvent) => {
     event.stopPropagation();
     props.onDelete(id);
   };
-  
+
   const [edit, setEdit] = useState<boolean>(false);
-  const [input, setInput] = useState<string>("");
+  const [input, setInput] = useState<string>(props.element.title);
   const [tasks, setTasks] = useState<task[]>([]);
 
-  useEffect(() => {    
-    setTasks(props.tasks);    
+  useEffect(() => {
+    setTasks(props.tasks);
   }, [props.tasks]);
 
   const {
@@ -130,7 +131,13 @@ const Column: React.FC<{
         </div>
         <div className="flex rounded-lg py-2 flex-col flex-grow gap-4 overflow-y-auto max-h-[280px]">
           {tasks.map((task) => (
-            <Task task={task} onDelete={taskDeleteHadnler} />
+            <Task
+              task={task}
+              onDelete={taskDeleteHadnler}
+              onUpdateTask={(id: id, newTitle: string) => {
+                props.onUpdateTask(id, newTitle);
+              }}
+            />
           ))}
         </div>
       </div>

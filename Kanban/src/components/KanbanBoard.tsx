@@ -96,7 +96,7 @@ const KanbanBoard = () => {
     const newTask: task = {
       colId: id,
       taskId: Math.random().toString(),
-      title: `Task ${tasks.length}`,
+      title: "New Task",
     };
 
     const updatedTasks = tasks.concat([newTask]);
@@ -105,6 +105,17 @@ const KanbanBoard = () => {
 
   const deleteTaskHandler = (id: id) => {
     const updatedTasks = tasks.filter((task) => task.taskId !== id);
+    setTasks(updatedTasks);
+  };
+
+  const updateTaskHandler = (id: id, newTitle: string) => {
+    const updatedTasks = tasks.map((task) => {
+      if (task.taskId !== id) {
+        return task;
+      } else {
+        return { ...task, title: newTitle };
+      }
+    });
     setTasks(updatedTasks);
   };
 
@@ -130,6 +141,9 @@ const KanbanBoard = () => {
                     createTask={createTask}
                     tasks={tasks.filter((task) => task.colId === element.id)}
                     onDeleteTask={deleteTaskHandler}
+                    onUpdateTask={(id: id, newTitle: string) =>
+                      updateTaskHandler(id, newTitle)
+                    }
                   />
                 );
               })}
@@ -165,8 +179,9 @@ const KanbanBoard = () => {
                   onDelete={deleteHandler}
                   updateColumn={updateColumn}
                   createTask={createTask}
-                  tasks={tasks}
+                  tasks={tasks.filter((task) => task.colId === activeCol.id)}
                   onDeleteTask={deleteTaskHandler}
+                  onUpdateTask={updateTaskHandler}
                 />
               )}
             </DragOverlay>,
