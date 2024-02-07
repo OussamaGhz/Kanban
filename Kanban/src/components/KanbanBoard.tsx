@@ -45,6 +45,34 @@ const KanbanBoard = () => {
     setCol(newCol);
   };
 
+  const createTask = (id: id) => {
+    const newTask: task = {
+      colId: id,
+      taskId: Math.random().toString(),
+      title: "New Task",
+    };
+
+    const updatedTasks = tasks.concat([newTask]);
+    setTasks(updatedTasks);
+  };
+
+  const deleteTaskHandler = (id: id) => {
+    const updatedTasks = tasks.filter((task) => task.taskId !== id);
+    setTasks(updatedTasks);
+  };
+
+  const updateTaskHandler = (id: id, newTitle: string) => {
+    const updatedTasks = tasks.map((task) => {
+      if (task.taskId !== id) {
+        return task;
+      } else {
+        return { ...task, title: newTitle };
+      }
+    });
+    setTasks(updatedTasks);
+  };
+
+  // DND logique
   // creating a list of ids for the SortableContext object
   const columnsId = useMemo(() => {
     return col.map((e) => e.id);
@@ -92,33 +120,6 @@ const KanbanBoard = () => {
     );
   };
 
-  const createTask = (id: id) => {
-    const newTask: task = {
-      colId: id,
-      taskId: Math.random().toString(),
-      title: "New Task",
-    };
-
-    const updatedTasks = tasks.concat([newTask]);
-    setTasks(updatedTasks);
-  };
-
-  const deleteTaskHandler = (id: id) => {
-    const updatedTasks = tasks.filter((task) => task.taskId !== id);
-    setTasks(updatedTasks);
-  };
-
-  const updateTaskHandler = (id: id, newTitle: string) => {
-    const updatedTasks = tasks.map((task) => {
-      if (task.taskId !== id) {
-        return task;
-      } else {
-        return { ...task, title: newTitle };
-      }
-    });
-    setTasks(updatedTasks);
-  };
-
   return (
     // setting the context provider for the dnd
 
@@ -151,7 +152,7 @@ const KanbanBoard = () => {
           </SortableContext>
 
           <button
-            className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-col-bg focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none flex items-center gap-3 "
+            className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white hover:shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)] hover:shadow-second-color flex items-center gap-3 "
             type="button"
             onClick={addHandlder}
           >

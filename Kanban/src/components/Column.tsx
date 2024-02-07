@@ -1,9 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { useSortable } from "@dnd-kit/sortable";
+import React, { useEffect, useMemo, useState } from "react";
+import { SortableContext, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import PlusIcon from "../icons/PlusIcon";
 import Task from "./Task";
 import DeleteIcon from "../icons/DeleteIcon";
+import {
+  DndContext,
+  DragOverlay,
+  DragStartEvent,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { createPortal } from "react-dom";
 
 const Column: React.FC<{
   element: columns;
@@ -22,11 +32,13 @@ const Column: React.FC<{
   const [edit, setEdit] = useState<boolean>(false);
   const [input, setInput] = useState<string>(props.element.title);
   const [tasks, setTasks] = useState<task[]>([]);
+  const [activeTask, setActiveTask] = useState<task | null>(null);
 
   useEffect(() => {
     setTasks(props.tasks);
   }, [props.tasks]);
 
+  // DND logique =====================================================================================
   const {
     setNodeRef,
     attributes,
@@ -40,12 +52,14 @@ const Column: React.FC<{
       type: "column",
       column: props.element,
     },
+    disabled: edit,
   });
 
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
   };
+  // ======================================================================================================
 
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target.value;
@@ -63,6 +77,42 @@ const Column: React.FC<{
   const taskDeleteHadnler = (id: id) => {
     props.onDeleteTask(id);
   };
+
+  // DND logique
+  const tasksId = useMemo(
+    () => props.tasks.map((task) => task.taskId),
+    [props.tasks]
+  );
+
+  const handleOnDragStart = (event: DragStartEvent) => {
+    if (event.active.data.current?.type === "task") {
+      setActiveTask(event.active.data.current.task);
+    }
+  };
+
+  const handleOnDragEnd = (event: DragEndEvent) => {
+    const { over, active } = event;
+    if (!over) {
+      return;
+    }
+    if (over.id === active.id) {
+      return;
+    }
+    const overId = tasks.findIndex((t) => t.taskId === over.id);
+    const activeId = tasks.findIndex((t) => t.taskId === active.id);
+    const updatedTasks = arrayMove(tasks, overId, activeId);
+
+    setTasks(updatedTasks);
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 30,
+      },
+    })
+  );
+
   if (isDragging) {
     return (
       <div
@@ -81,75 +131,97 @@ const Column: React.FC<{
       key={props.element.id}
       className="bg-col-bg w-full sm:w-80 h-[400px] max-h-[500px] rounded-lg flex flex-col justify-between gap-2 text-white p-2 shadow-[0_3px_10px_rgb(0,0,0,0.2)] shadow-col-bg"
     >
-      <div>
-        <div
-          className="flex rounded-lg bg-second-color px-4 py-2 justify-between"
-          {...attributes}
-          {...listeners}
-          onClick={() => setEdit(true)}
-        >
-          <div className="flex gap-3 font-bold">
-            {!edit && <div>{props.element.title}</div>}
-            {edit && (
-              <div className="flex mr-2">
-                <input
-                  value={input}
-                  placeholder={props.element.title}
-                  onBlur={() => {
-                    submitHandler();
-                    setEdit(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      setEdit(false);
-                      submitHandler();
-                    }
-                  }}
-                  autoFocus
-                  onChange={(e) => {
-                    changeHandler(e);
-                  }}
-                  className="bg-transparent border-none text-white font-bold w-full outline-none"
-                />
-                <button
-                  className="opacity-75 hover:opacity-100 rounded-full px-2"
-                  onClick={() => submitHandler()}
-                >
-                  submit
-                </button>
-              </div>
-            )}
-          </div>
-          <button
-            onClick={(event: React.MouseEvent) =>
-              deleteHandler(props.element.id, event)
-            }
-            className="opacity-80 hover:opacity-100"
+      <DndContext
+        onDragStart={handleOnDragStart}
+        onDragEnd={handleOnDragEnd}
+        sensors={sensors}
+      >
+        <div>
+          <div
+            className="flex rounded-lg bg-second-color px-4 py-2 justify-between"
+            {...attributes}
+            {...listeners}
+            onClick={() => setEdit(true)}
           >
-            <DeleteIcon />
+            <div className="flex gap-3 font-bold">
+              {!edit && <div>{props.element.title}</div>}
+              {edit && (
+                <div className="flex mr-2">
+                  <input
+                    value={input}
+                    placeholder={props.element.title}
+                    onBlur={() => {
+                      submitHandler();
+                      setEdit(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setEdit(false);
+                        submitHandler();
+                      }
+                    }}
+                    autoFocus
+                    onChange={(e) => {
+                      changeHandler(e);
+                    }}
+                    className="bg-transparent border-none text-white font-bold w-full outline-none"
+                  />
+                  <button
+                    className="opacity-75 hover:opacity-100 rounded-full px-2"
+                    onClick={() => submitHandler()}
+                  >
+                    submit
+                  </button>
+                </div>
+              )}
+            </div>
+            <button
+              onClick={(event: React.MouseEvent) =>
+                deleteHandler(props.element.id, event)
+              }
+              className="opacity-80 hover:opacity-100"
+            >
+              <DeleteIcon />
+            </button>
+          </div>
+          <SortableContext items={tasksId}>
+            <div className="flex rounded-lg py-2 flex-col flex-grow gap-4 overflow-y-auto max-h-[280px]">
+              {tasks.map((task) => (
+                <Task
+                  task={task}
+                  onDelete={taskDeleteHadnler}
+                  onUpdateTask={(id: id, newTitle: string) => {
+                    props.onUpdateTask(id, newTitle);
+                  }}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </div>
+        <div
+          className="flex rounded-lg px-3 py-2 gap-2 hover:bg-second-color transition-all duration-300 ease-in-out cursor-pointer"
+          onClick={() => createTaskHandler(props.element.id)}
+        >
+          <button className="rounded-full  flex gap-2 px-2 py-1 ">
+            <PlusIcon />
+            Add Task
           </button>
         </div>
-        <div className="flex rounded-lg py-2 flex-col flex-grow gap-4 overflow-y-auto max-h-[280px]">
-          {tasks.map((task) => (
-            <Task
-              task={task}
-              onDelete={taskDeleteHadnler}
-              onUpdateTask={(id: id, newTitle: string) => {
-                props.onUpdateTask(id, newTitle);
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      <div
-        className="flex rounded-lg px-3 py-2 gap-2 hover:bg-second-color transition-all duration-300 ease-in-out cursor-pointer"
-        onClick={() => createTaskHandler(props.element.id)}
-      >
-        <button className="rounded-full  flex gap-2 px-2 py-1 ">
-          <PlusIcon />
-          Add Task
-        </button>
-      </div>
+        {createPortal(
+          activeTask && (
+            <DragOverlay>
+              <Task
+                task={activeTask}
+                onDelete={taskDeleteHadnler}
+                onUpdateTask={(id: id, newTitle: string) => {
+                  props.onUpdateTask(id, newTitle);
+                }}
+              />
+            </DragOverlay>
+          ),
+          document.body
+        )}
+      </DndContext>
     </div>
   );
 };
