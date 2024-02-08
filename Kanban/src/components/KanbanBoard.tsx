@@ -11,6 +11,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
+import Task from "./Task";
 
 const KanbanBoard = () => {
   const [col, setCol] = useState<columns[]>([
@@ -29,6 +30,7 @@ const KanbanBoard = () => {
   ]);
   const [activeCol, setActiveCol] = useState<columns | null>(null);
   const [tasks, setTasks] = useState<task[]>([]);
+  const [activeTask, setActiveTask] = useState<task | null>(null);
 
   const addHandlder = () => {
     setCol([
@@ -83,7 +85,14 @@ const KanbanBoard = () => {
     if (event.active.data.current?.type === "column") {
       setActiveCol(event.active.data.current.column);
     }
+    if (event.active.data.current?.type === "task") {
+      setActiveTask(event.active.data.current.task);
+    }
   };
+
+  const dragOverHandler = () => {
+    
+  }
 
   //   setting the logique for the dragabale when its end to switch the places between columns
   const dragEndHandler = (event: DragEndEvent) => {
@@ -127,6 +136,7 @@ const KanbanBoard = () => {
       <DndContext
         onDragStart={dragStartHandler}
         onDragEnd={dragEndHandler}
+        onDragOver={dragOverHandler}
         sensors={sensors}
       >
         <div className="m-auto flex sm:flex-row flex-col gap-5 items-start">
@@ -183,6 +193,15 @@ const KanbanBoard = () => {
                   tasks={tasks.filter((task) => task.colId === activeCol.id)}
                   onDeleteTask={deleteTaskHandler}
                   onUpdateTask={updateTaskHandler}
+                />
+              )}
+              {activeTask && (
+                <Task
+                  task={activeTask}
+                  onDelete={deleteTaskHandler}
+                  onUpdateTask={(id: id, newTitle: string) =>
+                    updateTaskHandler(id, newTitle)
+                  }
                 />
               )}
             </DragOverlay>,
