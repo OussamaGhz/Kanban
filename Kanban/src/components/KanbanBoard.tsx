@@ -14,6 +14,7 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import Task from "./Task";
 import PlusIcon from "../icons/PlusIcon";
+import ExportIcon from "../icons/ExportIcon";
 
 const LOCAL_STORAGE_KEY = "kanbanData";
 const getColumnsFromLocalStorage = () => {
@@ -264,15 +265,25 @@ const KanbanBoard = () => {
               })}
             </div>
           </SortableContext>
+          <div className="flex flex-col gap-4">
+            <button
+              className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white hover:shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)] hover:shadow-second-color flex items-center gap-3 "
+              type="button"
+              onClick={addHandlder}
+            >
+              <PlusIcon />
+              Add columns
+            </button>
+            <button
+              className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white hover:shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)] hover:shadow-second-color flex items-center gap-3 "
+              type="button"
+              onClick={exportData}
+            >
+              <ExportIcon />
+              Export Data
+            </button>
+          </div>
 
-          <button
-            className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white hover:shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)] hover:shadow-second-color flex items-center gap-3 "
-            type="button"
-            onClick={addHandlder}
-          >
-            <PlusIcon />
-            Add columns
-          </button>
           {createPortal(
             <DragOverlay>
               {activeCol && (
@@ -300,13 +311,6 @@ const KanbanBoard = () => {
           )}
         </div>
       </DndContext>
-      <button
-        className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white hover:shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)] hover:shadow-second-color flex items-center gap-3 "
-        type="button"
-        onClick={exportData}
-      >
-        Export Data
-      </button>
     </div>
   );
 };
