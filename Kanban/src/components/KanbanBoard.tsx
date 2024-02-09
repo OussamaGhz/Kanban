@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Column from "./Column";
 import {
   DndContext,
@@ -13,25 +13,59 @@ import {
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import Task from "./Task";
+import PlusIcon from "../icons/PlusIcon";
+
+const LOCAL_STORAGE_KEY = "kanbanData";
+const getColumnsFromLocalStorage = () => {
+  try {
+    const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+    return storedData ? JSON.parse(storedData) : getDefaultColumns();
+  } catch (error) {
+    console.error("Error parsing columns from local storage:", error);
+    return [];
+  }
+};
+
+const getTasksFromLocalStorage = () => {
+  try {
+    const storedTasks = localStorage.getItem("tasks");
+    return storedTasks ? JSON.parse(storedTasks) : [];
+  } catch (error) {
+    console.error("Error parsing tasks from local storage:", error);
+    return [];
+  }
+};
+
+const getDefaultColumns = () => [
+  { id: "1", title: "Todo" },
+  { id: "2", title: "In Progress" },
+  { id: "3", title: "Completed" },
+];
 
 const KanbanBoard = () => {
-  const [col, setCol] = useState<columns[]>([
-    {
-      id: "1",
-      title: "To-Do",
-    },
-    {
-      id: "2",
-      title: "In Progress",
-    },
-    {
-      id: "3",
-      title: "Completed",
-    },
-  ]);
+  // Load data from local storage or use default values
+  const initialColumns = getColumnsFromLocalStorage() || [
+    { id: "1", title: "To-Do" },
+    { id: "2", title: "In Progress" },
+    { id: "3", title: "Completed" },
+  ];
+
+  const initialTasks = getTasksFromLocalStorage() || [];
+
+  const [col, setCol] = useState<columns[]>(initialColumns);
+  const [tasks, setTasks] = useState<task[]>(initialTasks);
+
   const [activeCol, setActiveCol] = useState<columns | null>(null);
-  const [tasks, setTasks] = useState<task[]>([]);
   const [activeTask, setActiveTask] = useState<task | null>(null);
+
+  // Save data to local storage whenever columns or tasks are updated
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(col));
+  }, [col]);
+
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }, [tasks]);
 
   const addHandlder = () => {
     setCol([
@@ -116,7 +150,6 @@ const KanbanBoard = () => {
     });
   };
 
-
   const dragOverHandler = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
@@ -158,7 +191,6 @@ const KanbanBoard = () => {
       });
     }
   };
-
 
   // solving the problem of the delete button (conflict with the drag action and the button action)
   // adding some kind of delay for the drag to avoid the conflict
@@ -213,20 +245,7 @@ const KanbanBoard = () => {
             type="button"
             onClick={addHandlder}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-              />
-            </svg>
+            <PlusIcon />
             Add columns
           </button>
           {createPortal(
