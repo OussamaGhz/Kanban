@@ -208,6 +208,31 @@ const KanbanBoard = () => {
     );
   };
 
+  const exportData = () => {
+    // Combine each task with its related column
+    const combinedData = col.map((column) => ({
+      ...column,
+      tasks: tasks.filter((task) => task.colId === column.id),
+    }));
+
+    // Create an object with the combined data
+    const exportedData = {
+      columns: combinedData,
+    };
+
+    // Convert the object to a JSON string
+    const jsonString = JSON.stringify(exportedData, null, 2);
+
+    // Create a Blob with the JSON data
+    const blob = new Blob([jsonString], { type: "application/json" });
+
+    // Create a download link and trigger a click to download the file
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = "kanban-export.json";
+    downloadLink.click();
+  };
+
   return (
     // setting the context provider for the dnd
 
@@ -275,6 +300,13 @@ const KanbanBoard = () => {
           )}
         </div>
       </DndContext>
+      <button
+        className="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-second-color text-white hover:shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,78,255,0.15)] hover:shadow-second-color flex items-center gap-3 "
+        type="button"
+        onClick={exportData}
+      >
+        Export Data
+      </button>
     </div>
   );
 };
