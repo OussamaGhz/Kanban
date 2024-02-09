@@ -3,6 +3,7 @@ import Column from "./Column";
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -90,12 +91,11 @@ const KanbanBoard = () => {
     }
   };
 
-  const dragOverHandler = () => {
-    
-  }
-
   //   setting the logique for the dragabale when its end to switch the places between columns
   const dragEndHandler = (event: DragEndEvent) => {
+    setActiveCol(null);
+    setActiveTask(null);
+
     const { active, over } = event;
     if (!over) {
       return;
@@ -106,12 +106,59 @@ const KanbanBoard = () => {
       return;
     }
 
+    const isActiveAColumn = active.data.current?.type === "column";
+    if (!isActiveAColumn) return;
+
     setCol((col) => {
       const activeIndex = col.findIndex((c) => c.id === activeColumn);
       const overIndex = col.findIndex((c) => c.id === overColumn);
       return arrayMove(col, activeIndex, overIndex);
     });
   };
+
+
+  const dragOverHandler = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    if (activeId === overId) return;
+
+    const isActiveATask = active.data.current?.type === "task";
+    const isOverATask = over.data.current?.type === "task";
+
+    if (!isActiveATask) return;
+
+    // dropping a Task over another Task
+    if (isActiveATask && isOverATask) {
+      setTasks((tasks) => {
+        const activeIndex = tasks.findIndex((t) => t.taskId === activeId);
+        const overIndex = tasks.findIndex((t) => t.taskId === overId);
+
+        if (tasks[activeIndex].colId != tasks[overIndex].colId) {
+          tasks[activeIndex].colId = tasks[overIndex].colId;
+          return arrayMove(tasks, activeIndex, overIndex - 1);
+        }
+
+        return arrayMove(tasks, activeIndex, overIndex);
+      });
+    }
+
+    const isOverAColumn = over.data.current?.type === "column";
+
+    // dropping a Task over a column
+    if (isActiveATask && isOverAColumn) {
+      setTasks((tasks) => {
+        const activeIndex = tasks.findIndex((t) => t.taskId === activeId);
+
+        tasks[activeIndex].colId = overId;
+        return arrayMove(tasks, activeIndex, activeIndex);
+      });
+    }
+  };
+
 
   // solving the problem of the delete button (conflict with the drag action and the button action)
   // adding some kind of delay for the drag to avoid the conflict

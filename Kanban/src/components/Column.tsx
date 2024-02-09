@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { SortableContext, arrayMove, useSortable } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import PlusIcon from "../icons/PlusIcon";
 import Task from "./Task";
 import DeleteIcon from "../icons/DeleteIcon";
-import {  DragEndEvent } from "@dnd-kit/core";
 
 const Column: React.FC<{
   element: columns;
@@ -73,23 +72,6 @@ const Column: React.FC<{
     () => props.tasks.map((task) => task.taskId),
     [props.tasks]
   );
-
-
-  const handleOnDragEnd = (event: DragEndEvent) => {
-    const { over, active } = event;
-    if (!over) {
-      return;
-    }
-    if (over.id === active.id) {
-      return;
-    }
-
-    const overId = tasks.findIndex((t) => t.taskId === over.id);
-    const activeId = tasks.findIndex((t) => t.taskId === active.id);
-    const updatedTasks = arrayMove(tasks, overId, activeId);
-
-    setTasks(updatedTasks);
-  };
 
   if (isDragging) {
     return (
